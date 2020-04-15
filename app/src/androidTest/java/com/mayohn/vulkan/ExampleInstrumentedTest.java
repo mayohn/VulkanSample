@@ -1,4 +1,4 @@
-package com.mayohn.vulkansample;
+package com.mayohn.vulkan;
 
 import android.content.Context;
 
