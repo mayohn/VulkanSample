@@ -4,7 +4,7 @@
 
 #include "JniRenderer.h"
 
-
+char *mGLSLPath;
 void Program01Renderer::onSurfaceCreated() {
 
 }
