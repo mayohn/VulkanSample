@@ -4,9 +4,9 @@
 
 #include "JniRenderer.h"
 
-char *mGLSLPath;
+//char *mGLSLPath;
 void Program01Renderer::onSurfaceCreated() {
-
+    mGLSLPath = nullptr;
 }
 
 void Program01Renderer::onSurfaceChanged(jint width, jint height) {

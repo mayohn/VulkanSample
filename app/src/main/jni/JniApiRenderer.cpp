@@ -11,7 +11,7 @@
  * Signature: (Ljava/lang/String;Ljava/lang/String;)V
  */
 Renderder *renderer;
-
+char *mGLSLPath;
 extern "C" JNIEXPORT void JNICALL Java_com_mayohn_vulkan_jni_JniRenderer_setGLSLPath
         (JNIEnv *env, jobject obj, jstring jpath, jstring tag) {
     mGLSLPath = const_cast<char *>(env->GetStringUTFChars(jpath, 0));

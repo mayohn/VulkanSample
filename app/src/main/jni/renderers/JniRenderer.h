@@ -9,12 +9,12 @@
 #include <string.h>
 #include <stdlib.h>
 #include "../shaderloader/LoadShaders.h"
-
+extern char *mGLSLPath;
 #ifdef __cplusplus
 extern "C" {
 #endif  // __cplusplus
 
-extern char *mGLSLPath;
+
 class Renderder {
 public:
     virtual void onSurfaceCreated() {}
