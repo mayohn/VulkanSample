@@ -13,7 +13,7 @@ extern "C" {
  * Signature: (Ljava/lang/String;Ljava/lang/String;)V
  */
 JNIEXPORT void JNICALL Java_com_mayohn_vulkan_jni_JniRenderer_setGLSLPath
-  (JNIEnv *, jobject, jstring, jstring);
+        (JNIEnv *, jobject, jstring, jstring);
 
 /*
  * Class:     com_mayohn_vulkan_jni_JniRenderer
@@ -21,7 +21,7 @@ JNIEXPORT void JNICALL Java_com_mayohn_vulkan_jni_JniRenderer_setGLSLPath
  * Signature: ()V
  */
 JNIEXPORT void JNICALL Java_com_mayohn_vulkan_jni_JniRenderer_onSurfaceCreated
-  (JNIEnv *, jobject);
+        (JNIEnv *, jobject, jobject);
 
 /*
  * Class:     com_mayohn_vulkan_jni_JniRenderer
@@ -29,7 +29,7 @@ JNIEXPORT void JNICALL Java_com_mayohn_vulkan_jni_JniRenderer_onSurfaceCreated
  * Signature: (II)V
  */
 JNIEXPORT void JNICALL Java_com_mayohn_vulkan_jni_JniRenderer_onSurfaceChanged
-  (JNIEnv *, jobject, jint, jint);
+        (JNIEnv *, jobject, jint, jint);
 
 /*
  * Class:     com_mayohn_vulkan_jni_JniRenderer
@@ -37,8 +37,16 @@ JNIEXPORT void JNICALL Java_com_mayohn_vulkan_jni_JniRenderer_onSurfaceChanged
  * Signature: ()V
  */
 JNIEXPORT void JNICALL Java_com_mayohn_vulkan_jni_JniRenderer_onDrawFrame
-  (JNIEnv *, jobject);
+        (JNIEnv *, jobject);
 
+
+/*
+ * Class:     com_mayohn_vulkan_jni_JniRenderer
+ * Method:    surfaceDestroyed
+ * Signature: (II)V
+ */
+JNIEXPORT void JNICALL Java_com_mayohn_vulkan_jni_JniRenderer_surfaceDestroyed
+        (JNIEnv *, jobject);
 #ifdef __cplusplus
 }
 #endif

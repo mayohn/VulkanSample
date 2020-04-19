@@ -3,31 +3,30 @@ package com.mayohn.vulkan;
 import android.app.Activity;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.SurfaceView;
 import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
 
+import com.mayohn.vulkan.renderers.BaseRenderer;
+import com.mayohn.vulkan.renderers.GameSurfaceView;
+import com.mayohn.vulkan.renderers.Program01Renderer;
+
 
 public class DrawActivity extends Activity {
-    private LinearLayout layout;
-    private GLSurfaceView glSurfaceView;
-    private GLSurfaceView.Renderer renderer;
-    private boolean rendererSet;
+    private SurfaceView surfaceView;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_draw);
-        layout = findViewById(R.id.layout);
-        glSurfaceView = new GLSurfaceView(this);
-        glSurfaceView.setEGLContextClientVersion(3);
         int i = getIntent().getIntExtra("Type", 0);
         switch (i) {
             case 0:
-
+                surfaceView = new GameSurfaceView(this);
                 break;
             case 1:
-
+                surfaceView = new Program01Renderer(this);
                 break;
             case 2:
 
@@ -39,25 +38,6 @@ public class DrawActivity extends Activity {
 
                 break;
         }
-        glSurfaceView.setRenderer(renderer);
-        rendererSet = true;
-        layout.removeAllViews();
-        layout.addView(glSurfaceView);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (rendererSet) {
-            glSurfaceView.onResume();
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (rendererSet) {
-            glSurfaceView.onPause();
-        }
+        setContentView(surfaceView);
     }
 }

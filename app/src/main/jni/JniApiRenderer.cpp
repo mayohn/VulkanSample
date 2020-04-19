@@ -2,6 +2,8 @@
 #include "renderers/JniRenderer.h"
 #include "com_mayohn_vulkan_jni_JniRenderer.h"
 #include <bits/strcasecmp.h>
+#include <android/native_window.h>
+#include <android/native_window_jni.h>
 
 /* Header for class com_mayohn_vulkan_jni_JniRenderer */
 
@@ -27,9 +29,10 @@ extern "C" JNIEXPORT void JNICALL Java_com_mayohn_vulkan_jni_JniRenderer_setGLSL
  * Signature: ()V
  */
 extern "C" JNIEXPORT void JNICALL Java_com_mayohn_vulkan_jni_JniRenderer_onSurfaceCreated
-        (JNIEnv *env, jobject obj) {
+        (JNIEnv *env, jobject obj, jobject surface) {
     if (NULL != renderer) {
-        renderer->onSurfaceCreated();
+        ANativeWindow* mANativeWindow = ANativeWindow_fromSurface(env, surface);
+        renderer->onSurfaceCreated(mANativeWindow);
     }
 }
 
@@ -54,6 +57,18 @@ extern "C" JNIEXPORT void JNICALL Java_com_mayohn_vulkan_jni_JniRenderer_onDrawF
         (JNIEnv *env, jobject obj) {
     if (NULL != renderer) {
         renderer->onDrawFrame();
+    }
+}
+
+/*
+ * Class:     com_mayohn_vulkan_jni_JniRenderer
+ * Method:    surfaceDestroyed
+ * Signature: (II)V
+ */
+extern "C" JNIEXPORT void JNICALL Java_com_mayohn_vulkan_jni_JniRenderer_surfaceDestroyed
+        (JNIEnv *env, jobject obj) {
+    if (NULL != renderer) {
+        renderer->surfaceDestroyed();
     }
 }
 

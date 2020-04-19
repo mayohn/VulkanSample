@@ -12,13 +12,6 @@ cmake_minimum_required(VERSION 3.4.1)
 FILE(GLOB_RECURSE SOURCE_FILES src/main/jni/*.cpp src/main/jni/*.h)
 foreach (SOURCE ${SOURCE_FILES})
     message(---------${SOURCE}---------)
-    message("马永恒")
-    message("马永恒")
-    message("马永恒")
-    message("马永恒")
-    message("马永恒")
-    message("马永恒")
-    message("马永恒")
 endforeach ()
 add_library( # Sets the name of the library.
         renderer
@@ -34,12 +27,13 @@ add_library( # Sets the name of the library.
 # you want to add. CMake verifies that the library exists before
 # completing its build.
 
-find_library( # Sets the name of the path variable.
-        log-lib
+# Build application's shared lib
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11  -Werror -D VK_USE_PLATFORM_ANDROID_KHR")
 
-        # Specifies the name of the NDK library that
-        # you want CMake to locate.
-        log)
+# Force export ANativeActivity_onCreate(),
+# Refer to: https://github.com/android-ndk/ndk/issues/381.
+set(CMAKE_SHARED_LINKER_FLAGS
+        "${CMAKE_SHARED_LINKER_FLAGS} -u ANativeActivity_onCreate")
 
 # Specifies libraries CMake should link to your target library. You
 # can link multiple libraries, such as libraries you define in this
@@ -47,5 +41,6 @@ find_library( # Sets the name of the path variable.
 
 target_link_libraries( # Specifies the target library.
         renderer
-        ${log-lib}
+        android
+        log
         )

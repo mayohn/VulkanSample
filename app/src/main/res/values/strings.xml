@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">VulkanSample</string>
     <string-array name="pages">
+        <item>surfaceTest</item>
         <item>program01</item>
     </string-array>
 </resources>
