@@ -8,8 +8,8 @@
 #include <jni.h>
 #include <string.h>
 #include <stdlib.h>
+#include <android/native_window.h>
 #include "../shaderloader/LoadShaders.h"
-#include "../vulkan_wrapper/vulkan_wrapper.h" // Include Vulkan_wrapper and dynamically load symbols.
 
 extern char *mGLSLPath;
 #ifdef __cplusplus
