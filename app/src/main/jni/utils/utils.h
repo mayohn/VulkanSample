@@ -16,6 +16,7 @@ extern "C" {
 #endif // __cplusplus
 bool init_global_layer_properties();
 void createInstance();
+void initLayersProperties();
 #ifdef __cplusplus
 }
 #endif // __cplusplus
