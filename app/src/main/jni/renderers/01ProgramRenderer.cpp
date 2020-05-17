@@ -8,6 +8,9 @@
 void Program01Renderer::onSurfaceCreated(ANativeWindow *pWindow) {
     if (!init_global_layer_properties())return;
     createInstance();
+    pickPhysicalDevice();
+    createSurface(pWindow);
+    initDeviceQueue();
 }
 
 void Program01Renderer::onSurfaceChanged(jint width, jint height) {
@@ -19,6 +22,5 @@ void Program01Renderer::onDrawFrame() {
 }
 
 void Program01Renderer::surfaceDestroyed() {
-
-
+    cleanup();
 }
