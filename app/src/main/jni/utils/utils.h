@@ -22,7 +22,6 @@ extern "C" {
 bool init_global_layer_properties();
 void createInstance();
 void initLayersProperties();
-
 void pickPhysicalDevice();
 void createSurface(ANativeWindow *pWindow);
 void initDeviceQueue();

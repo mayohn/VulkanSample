@@ -8,8 +8,8 @@
 void Program01Renderer::onSurfaceCreated(ANativeWindow *pWindow) {
     if (!init_global_layer_properties())return;
     createInstance();
-    pickPhysicalDevice();
     createSurface(pWindow);
+    pickPhysicalDevice();
     initDeviceQueue();
 }
 

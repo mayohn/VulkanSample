@@ -6,6 +6,8 @@
 #include "../vulkan_wrapper/vulkan_wrapper.h" // Include Vulkan_wrapper and dynamically load symbols.
 #include <malloc.h>
 #include <vector>
+#include <set>
+#include <iostream>
 
 #ifdef __cplusplus
 extern "C" {
@@ -17,8 +19,8 @@ std::vector<const char *> instanceExtension = {VK_KHR_SURFACE_EXTENSION_NAME,
                                                VK_KHR_ANDROID_SURFACE_EXTENSION_NAME};
 const std::vector<const char *> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-uint32_t graphicsFamily = 0;
-uint32_t presentFamily = 0;
+int graphicsFamily = -1;
+int presentFamily = -1;
 int width, height;
 VkDevice device;
 VkQueue graphicsQueue;
@@ -77,6 +79,44 @@ void createInstance() {
     }
 }
 
+bool checkDeviceExtensionSupport(VkPhysicalDevice device) {
+    uint32_t extensionCount;
+    vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
+    std::vector<VkExtensionProperties> avaliableExtensions(extensionCount);
+    vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount,
+                                         avaliableExtensions.data());
+    std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
+    for (const auto &extension : avaliableExtensions) {
+        requiredExtensions.erase(extension.extensionName);
+    }
+    return requiredExtensions.empty();
+}
+
+bool isDeviceSuitable(VkPhysicalDevice device) {
+    uint32_t queueFamilyCount = 0;
+    vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+    std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+    vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
+    uint32_t i = 0;
+    for (const auto &queueFamily : queueFamilies) {
+        if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+            graphicsFamily = i;
+        }
+        VkBool32 presentSupport = false;
+        vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
+        if (presentSupport) {
+            presentFamily = i;
+        }
+        i++;
+    }
+    bool extensionsSupport = checkDeviceExtensionSupport(device);
+    LOGE("graphicsFamily=%d  presentFamily=%d extensionsSupport=%d ", graphicsFamily,presentFamily,extensionsSupport);
+    if (graphicsFamily != -1 && presentFamily != -1 && extensionsSupport) {
+        return true;
+    } else {
+        return false;
+    }
+}
 
 void pickPhysicalDevice() {
     uint32_t deviceCount = 0;
@@ -89,27 +129,14 @@ void pickPhysicalDevice() {
     VkPhysicalDeviceProperties deviceProperties;
     VkPhysicalDeviceFeatures deviceFeatures;
     for (const auto &device:devices) {
-        uint32_t queueFamilyCount = 0;
-        vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
-        std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
-        vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
-        uint32_t i = 0;
-        for (const auto &queueFamily : queueFamilies) {
-            if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
-                graphicsFamily = i;
-                physicalDevice = device;
-            }
-            VkBool32 presentSupport = false;
-            vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
-            if (presentSupport) {
-                presentFamily = i;
-            }
-            i++;
+        if (isDeviceSuitable(device)) {
+            physicalDevice = device;
         }
     }
     if (physicalDevice == VK_NULL_HANDLE) {
         LOGE("failed to find a suitable GPU!");
     }
+
     VkDeviceQueueCreateInfo queueCreateInfo = {};
     queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
     queueCreateInfo.queueFamilyIndex = graphicsFamily;
@@ -137,6 +164,8 @@ void createSurface(ANativeWindow *pWindow) {
 
     if (vkCreateAndroidSurfaceKHR(instance, &createInfo, nullptr, &surface) != VK_SUCCESS) {
         LOGE("failed to create surface!");
+    } else{
+        LOGI("success to create surface!");
     }
 
 }
