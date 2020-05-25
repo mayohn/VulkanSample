@@ -28,7 +28,7 @@ add_library( # Sets the name of the library.
 # completing its build.
 
 # Build application's shared lib
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11  -Werror -D VK_USE_PLATFORM_ANDROID_KHR")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11  -Werror,-Wmissing-declarations -D VK_USE_PLATFORM_ANDROID_KHR ")
 
 # Force export ANativeActivity_onCreate(),
 # Refer to: https://github.com/android-ndk/ndk/issues/381.

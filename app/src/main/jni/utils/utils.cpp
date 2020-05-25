@@ -3,7 +3,6 @@
 //
 
 #include "utils.h"
-#include "../vulkan_wrapper/vulkan_wrapper.h" // Include Vulkan_wrapper and dynamically load symbols.
 #include <malloc.h>
 #include <vector>
 #include <set>
@@ -79,6 +78,27 @@ void createInstance() {
     }
 }
 
+SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device) {
+    SwapChainSupportDetails details;
+    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &details.capabilities);
+    uint32_t formatCount;
+    vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, nullptr);
+    if (formatCount != 0) {
+        details.formates.resize(formatCount);
+        vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount,
+                                             details.formates.data());
+    }
+
+    uint32_t presentModeCount;
+    vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, nullptr);
+    if (presentModeCount != 0) {
+        details.presentModes.resize(presentModeCount);
+        vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount,
+                                                  details.presentModes.data());
+    }
+    return details;
+}
+
 bool checkDeviceExtensionSupport(VkPhysicalDevice device) {
     uint32_t extensionCount;
     vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
@@ -110,8 +130,16 @@ bool isDeviceSuitable(VkPhysicalDevice device) {
         i++;
     }
     bool extensionsSupport = checkDeviceExtensionSupport(device);
-    LOGE("graphicsFamily=%d  presentFamily=%d extensionsSupport=%d ", graphicsFamily,presentFamily,extensionsSupport);
-    if (graphicsFamily != -1 && presentFamily != -1 && extensionsSupport) {
+    bool swapChainAdequate = false;
+    if (extensionsSupport) {
+        SwapChainSupportDetails swapChainSupport = querySwapChainSupport(device);
+        swapChainAdequate =
+                !swapChainSupport.formates.empty() && !swapChainSupport.presentModes.empty();
+    }
+    LOGE("graphicsFamily=%d  presentFamily=%d extensionsSupport=%d swapChainAdequate=%d",
+         graphicsFamily, presentFamily,
+         extensionsSupport, swapChainAdequate);
+    if (graphicsFamily != -1 && presentFamily != -1 && extensionsSupport && swapChainAdequate) {
         return true;
     } else {
         return false;
@@ -164,7 +192,7 @@ void createSurface(ANativeWindow *pWindow) {
 
     if (vkCreateAndroidSurfaceKHR(instance, &createInfo, nullptr, &surface) != VK_SUCCESS) {
         LOGE("failed to create surface!");
-    } else{
+    } else {
         LOGI("success to create surface!");
     }
 
