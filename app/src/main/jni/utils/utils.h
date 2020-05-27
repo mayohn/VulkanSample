@@ -31,6 +31,10 @@ void initLayersProperties();
 void pickPhysicalDevice();
 void createSurface(ANativeWindow *pWindow);
 void initDeviceQueue();
+void createSwapChain();
+
+void init_window_size(int32_t default_width, int32_t default_height);
+
 void cleanup();
 #ifdef __cplusplus
 }
