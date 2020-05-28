@@ -11,11 +11,12 @@ void Program01Renderer::onSurfaceCreated(ANativeWindow *pWindow) {
     createSurface(pWindow);
     pickPhysicalDevice();
     initDeviceQueue();
-    createSwapChain();
 }
 
 void Program01Renderer::onSurfaceChanged(jint width, jint height) {
     init_window_size(width, height);
+    createSwapChain();
+    createImageViews();
 }
 
 void Program01Renderer::onDrawFrame() {

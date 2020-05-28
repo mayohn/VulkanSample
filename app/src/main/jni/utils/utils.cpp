@@ -26,6 +26,10 @@ VkQueue graphicsQueue;
 VkQueue presentQueue;
 VkSurfaceKHR surface;
 VkSwapchainKHR swapChain;
+std::vector<VkImage> swapChainImages;
+VkFormat swapChainImageFormat;
+VkExtent2D swapChainExtent;
+std::vector<VkImageView> swapChainImageViews;
 
 bool init_global_layer_properties() {
     if (!InitVulkan()) {
@@ -178,7 +182,7 @@ bool isDeviceSuitable(VkPhysicalDevice device) {
         swapChainAdequate =
                 !swapChainSupport.formates.empty() && !swapChainSupport.presentModes.empty();
     }
-    LOGE("graphicsFamily=%d  presentFamily=%d extensionsSupport=%d swapChainAdequate=%d",
+    LOGI("graphicsFamily=%d  presentFamily=%d extensionsSupport=%d swapChainAdequate=%d",
          graphicsFamily, presentFamily,
          extensionsSupport, swapChainAdequate);
     if (graphicsFamily != -1 && presentFamily != -1 && extensionsSupport && swapChainAdequate) {
@@ -251,7 +255,7 @@ void createSwapChain() {
     SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice);
     VkSurfaceFormatKHR surfaceFormatKhr = chooseSwapSufraceFormate(swapChainSupport.formates);
     VkPresentModeKHR presentModeKhr = chooseSwapPresentMode(swapChainSupport.presentModes);
-    VkExtent2D extent2D = chooseSwapExtent(swapChainSupport.capabilities);
+    VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
     uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
     if (swapChainSupport.capabilities.maxImageCount > 0 &&
         imageCount > swapChainSupport.capabilities.maxImageCount) {
@@ -263,7 +267,7 @@ void createSwapChain() {
     createInfo.minImageCount = imageCount;
     createInfo.imageFormat = surfaceFormatKhr.format;
     createInfo.imageColorSpace = surfaceFormatKhr.colorSpace;
-    createInfo.imageExtent = extent2D;
+    createInfo.imageExtent = extent;
     createInfo.imageArrayLayers = 1;
     createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
@@ -285,19 +289,52 @@ void createSwapChain() {
     if (vkCreateSwapchainKHR(device, &createInfo, nullptr, &swapChain) != VK_SUCCESS) {
         LOGE("failed to create swap chain!");
     }
+    vkGetSwapchainImagesKHR(device, swapChain, &imageCount, nullptr);
+    swapChainImages.resize(imageCount);
+    vkGetSwapchainImagesKHR(device, swapChain, &imageCount, swapChainImages.data());
+    swapChainImageFormat = surfaceFormatKhr.format;
+    swapChainExtent = extent;
 }
+void createImageViews() {
+    swapChainImageViews.resize(swapChainImages.size());
+    for (int i = 0; i < swapChainImages.size(); i++) {
+        VkImageViewCreateInfo createInfo = {};
+        createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+        createInfo.image = swapChainImages[i];
+        createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+        createInfo.format = swapChainImageFormat;
+        createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+        createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+        createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+        createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+        createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        createInfo.subresourceRange.baseMipLevel = 0;
+        createInfo.subresourceRange.levelCount = 1;
+        createInfo.subresourceRange.baseArrayLayer = 0;
+        createInfo.subresourceRange.layerCount = 1;
+        if (vkCreateImageView(device, &createInfo, nullptr, &swapChainImageViews[i]) !=
+            VK_SUCCESS) {
+            LOGE("failed to create imageviews!");
+        }
 
+    }
+}
 void init_window_size(int32_t default_width, int32_t default_height) {
     width = default_width;
     height = default_height;
+    LOGI("width=%d,height=%d", width, height);
 }
 
 
 void cleanup() {
+    for (auto imageview:swapChainImageViews) {
+        vkDestroyImageView(device, imageview, nullptr);
+    }
     vkDestroySwapchainKHR(device, swapChain, nullptr);
     vkDestroySurfaceKHR(instance, surface, nullptr);
     vkDestroyDevice(device, NULL);
     vkDestroyInstance(instance, nullptr);
+
 }
 
 #ifdef __cplusplus
