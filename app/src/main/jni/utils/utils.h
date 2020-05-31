@@ -36,6 +36,7 @@ void initDeviceQueue();
 void init_window_size(int32_t default_width, int32_t default_height);
 void createSwapChain();
 void createImageViews();
+void createGraphicsPipeline(const char *fileName);
 void cleanup();
 #ifdef __cplusplus
 }

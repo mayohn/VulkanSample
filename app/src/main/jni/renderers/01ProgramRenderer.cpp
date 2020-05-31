@@ -17,6 +17,7 @@ void Program01Renderer::onSurfaceChanged(jint width, jint height) {
     init_window_size(width, height);
     createSwapChain();
     createImageViews();
+    createGraphicsPipeline(mGLSLPath);
 }
 
 void Program01Renderer::onDrawFrame() {
