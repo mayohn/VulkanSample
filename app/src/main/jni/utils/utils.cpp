@@ -34,6 +34,7 @@ std::vector<VkImageView> swapChainImageViews;
 VkPipelineLayout pipelineLayout;
 VkRenderPass renderPass;
 VkPipeline graphicsPipeline;
+std::vector<VkFramebuffer> swapChainFramebuffers;
 
 
 bool init_global_layer_properties() {
@@ -528,9 +529,29 @@ void createGraphicsPipeline(const char *filePath) {
     vkDestroyShaderModule(device, vertShaderModule, nullptr);
     vkDestroyShaderModule(device, fragShaderModule, nullptr);
 }
-
+void createFramebuffers() {
+    swapChainFramebuffers.reserve(swapChainImageViews.size());
+    for (size_t i = 0; i < swapChainImageViews.size(); i++) {
+        VkImageView attachments[] = {swapChainImageViews[i]};
+        VkFramebufferCreateInfo framebufferCreateInfo = {};
+        framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        framebufferCreateInfo.renderPass = renderPass;
+        framebufferCreateInfo.attachmentCount = 1;
+        framebufferCreateInfo.pAttachments = attachments;
+        framebufferCreateInfo.width = swapChainExtent.width;
+        framebufferCreateInfo.height = swapChainExtent.height;
+        framebufferCreateInfo.layers = 1;
+        if (vkCreateFramebuffer(device, &framebufferCreateInfo, nullptr,
+                                &swapChainFramebuffers[i]) != VK_SUCCESS) {
+            LOGE("failed to create framebuffer!");
+        }
+    }
+}
 
 void cleanup() {
+    for (auto framebuffer:swapChainFramebuffers) {
+        vkDestroyFramebuffer(device, framebuffer, nullptr);
+    }
     vkDestroyPipeline(device, graphicsPipeline, nullptr);
     vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
     vkDestroyRenderPass(device, renderPass, nullptr);

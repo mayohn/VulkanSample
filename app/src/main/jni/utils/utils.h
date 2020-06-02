@@ -38,6 +38,7 @@ void createSwapChain();
 void createImageViews();
 void createRenderPass();
 void createGraphicsPipeline(const char *fileName);
+void createFramebuffers();
 void cleanup();
 #ifdef __cplusplus
 }

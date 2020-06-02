@@ -19,6 +19,7 @@ void Program01Renderer::onSurfaceChanged(jint width, jint height) {
     createImageViews();
     createRenderPass();
     createGraphicsPipeline(mGLSLPath);
+    createFramebuffers();
 }
 
 void Program01Renderer::onDrawFrame() {
