@@ -20,10 +20,11 @@ void Program01Renderer::onSurfaceChanged(jint width, jint height) {
     createRenderPass();
     createGraphicsPipeline(mGLSLPath);
     createFramebuffers();
+    createCommandPool();
+    createCommandBuffers();
 }
 
 void Program01Renderer::onDrawFrame() {
-
 }
 
 void Program01Renderer::surfaceDestroyed() {

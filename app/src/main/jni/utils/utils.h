@@ -39,6 +39,8 @@ void createImageViews();
 void createRenderPass();
 void createGraphicsPipeline(const char *fileName);
 void createFramebuffers();
+void createCommandPool();
+void createCommandBuffers();
 void cleanup();
 #ifdef __cplusplus
 }
