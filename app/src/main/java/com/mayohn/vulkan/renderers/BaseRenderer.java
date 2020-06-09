@@ -36,7 +36,6 @@ public class BaseRenderer extends SurfaceView implements SurfaceHolder.Callback,
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         Log.i(TAG, "surfaceCreated: ");
-        new Thread(this).start();
         jniRenderer.onSurfaceCreated(holder.getSurface());
     }
 
@@ -44,6 +43,7 @@ public class BaseRenderer extends SurfaceView implements SurfaceHolder.Callback,
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         Log.i(TAG, "surfaceChanged: ");
         jniRenderer.onSurfaceChanged(width, height);
+        new Thread(this).start();
     }
 
     @Override

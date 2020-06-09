@@ -41,6 +41,8 @@ void createGraphicsPipeline(const char *fileName);
 void createFramebuffers();
 void createCommandPool();
 void createCommandBuffers();
+void createSemaphores();
+void drawFrame();
 void cleanup();
 #ifdef __cplusplus
 }

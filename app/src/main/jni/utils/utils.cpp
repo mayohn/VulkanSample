@@ -37,6 +37,8 @@ VkPipeline graphicsPipeline;
 std::vector<VkFramebuffer> swapChainFramebuffers;
 VkCommandPool commandPool;
 std::vector<VkCommandBuffer> commandBuffers;
+VkSemaphore imageAvailableSemaphore;
+VkSemaphore renderFinishedSemaphore;
 
 bool init_global_layer_properties() {
     if (!InitVulkan()) {
@@ -254,8 +256,10 @@ void initDeviceQueue() {
     vkGetDeviceQueue(device, graphicsFamily, 0, &graphicsQueue);
     if (graphicsFamily == presentFamily) {
         presentQueue = graphicsQueue;
+        LOGI("graphicsFamily==presentFamily==%d", graphicsFamily);
     } else {
         vkGetDeviceQueue(device, presentFamily, 0, &presentQueue);
+        LOGI("presentFamily!=graphicsFamily==%d", graphicsFamily);
     }
 }
 void createSwapChain() {
@@ -590,10 +594,59 @@ void createCommandBuffers() {
         vkCmdEndRenderPass(commandBuffers[i]);
         if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS) {
             LOGE("failed to record command buffer!");
+        } else {
+            LOGI("success to record command buffer!");
         }
     }
 }
+void createSemaphores() {
+    VkSemaphoreCreateInfo createInfo = {};
+    createInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+    if (vkCreateSemaphore(device, &createInfo, nullptr, &imageAvailableSemaphore) != VK_SUCCESS ||
+        vkCreateSemaphore(device, &createInfo, nullptr, &renderFinishedSemaphore) != VK_SUCCESS) {
+        LOGE("falied to create semaphores!");
+    } else {
+        LOGI("success to create semaphores!");
+    }
+}
+void drawFrame() {
+    uint32_t imageIndex;
+    vkAcquireNextImageKHR(device, swapChain, UINT64_MAX,
+                          imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
+    VkSubmitInfo submintInfo = {};
+    submintInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    VkSemaphore waitSemaphores[] = {imageAvailableSemaphore};
+    VkPipelineStageFlags waitStages = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    submintInfo.waitSemaphoreCount = 1;
+    submintInfo.pWaitSemaphores = waitSemaphores;
+    submintInfo.pWaitDstStageMask = &waitStages;
+    submintInfo.commandBufferCount = 1;
+    submintInfo.pCommandBuffers = &commandBuffers[imageIndex];
+
+    VkSemaphore signalSemaphores[] = {renderFinishedSemaphore};
+    submintInfo.signalSemaphoreCount = 1;
+    submintInfo.pSignalSemaphores = signalSemaphores;
+    if (vkQueueSubmit(graphicsQueue, 1, &submintInfo, VK_NULL_HANDLE) != VK_SUCCESS) {
+        LOGE("failed to submit draw command buffer!");
+    } else {
+        LOGI("success to submit draw command buffer!");
+    }
+//    VkPresentInfoKHR presentInfo = {};
+//    presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+//    presentInfo.waitSemaphoreCount = 1;
+//    presentInfo.pWaitSemaphores = signalSemaphores;
+//
+//    VkSwapchainKHR swapChains[] = {swapChain};
+//    presentInfo.swapchainCount = 1;
+//    presentInfo.pSwapchains = swapChains;
+//    presentInfo.pImageIndices = &imageIndex;
+//    presentInfo.pResults = nullptr;
+//    vkQueuePresentKHR(presentQueue,&presentInfo);
+//    vkQueueWaitIdle(presentQueue);
+}
 void cleanup() {
+    vkDestroySemaphore(device, renderFinishedSemaphore, nullptr);
+    vkDestroySemaphore(device, imageAvailableSemaphore, nullptr);
     vkDestroyCommandPool(device, commandPool, nullptr);
     for (auto framebuffer:swapChainFramebuffers) {
         vkDestroyFramebuffer(device, framebuffer, nullptr);

@@ -22,9 +22,12 @@ void Program01Renderer::onSurfaceChanged(jint width, jint height) {
     createFramebuffers();
     createCommandPool();
     createCommandBuffers();
+    createSemaphores();
+
 }
 
 void Program01Renderer::onDrawFrame() {
+    drawFrame();
 }
 
 void Program01Renderer::surfaceDestroyed() {
