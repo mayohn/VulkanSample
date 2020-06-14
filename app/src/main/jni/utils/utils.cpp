@@ -642,7 +642,6 @@ void drawFrame() {
     presentInfo.pImageIndices = &imageIndex;
     presentInfo.pResults = nullptr;
     vkQueuePresentKHR(presentQueue,&presentInfo);
-
     vkQueueWaitIdle(presentQueue);
 }
 void cleanup() {
