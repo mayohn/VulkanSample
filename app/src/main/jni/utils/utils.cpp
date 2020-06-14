@@ -535,7 +535,7 @@ void createGraphicsPipeline(const char *filePath) {
     vkDestroyShaderModule(device, fragShaderModule, nullptr);
 }
 void createFramebuffers() {
-    swapChainFramebuffers.reserve(swapChainImageViews.size());
+    swapChainFramebuffers.resize(swapChainImageViews.size());
     for (size_t i = 0; i < swapChainImageViews.size(); i++) {
         VkImageView attachments[] = {swapChainImageViews[i]};
         VkFramebufferCreateInfo framebufferCreateInfo = {};
@@ -631,20 +631,22 @@ void drawFrame() {
     } else {
         LOGI("success to submit draw command buffer!");
     }
-//    VkPresentInfoKHR presentInfo = {};
-//    presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-//    presentInfo.waitSemaphoreCount = 1;
-//    presentInfo.pWaitSemaphores = signalSemaphores;
-//
-//    VkSwapchainKHR swapChains[] = {swapChain};
-//    presentInfo.swapchainCount = 1;
-//    presentInfo.pSwapchains = swapChains;
-//    presentInfo.pImageIndices = &imageIndex;
-//    presentInfo.pResults = nullptr;
-//    vkQueuePresentKHR(presentQueue,&presentInfo);
-//    vkQueueWaitIdle(presentQueue);
+    VkPresentInfoKHR presentInfo = {};
+    presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+    presentInfo.waitSemaphoreCount = 1;
+    presentInfo.pWaitSemaphores = signalSemaphores;
+
+    VkSwapchainKHR swapChains[] = {swapChain};
+    presentInfo.swapchainCount = 1;
+    presentInfo.pSwapchains = swapChains;
+    presentInfo.pImageIndices = &imageIndex;
+    presentInfo.pResults = nullptr;
+    vkQueuePresentKHR(presentQueue,&presentInfo);
+
+    vkQueueWaitIdle(presentQueue);
 }
 void cleanup() {
+    LOGI("cleanup");
     vkDestroySemaphore(device, renderFinishedSemaphore, nullptr);
     vkDestroySemaphore(device, imageAvailableSemaphore, nullptr);
     vkDestroyCommandPool(device, commandPool, nullptr);
