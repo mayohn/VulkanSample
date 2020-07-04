@@ -23,7 +23,6 @@ void Program01Renderer::onSurfaceChanged(jint width, jint height) {
     createCommandPool();
     createCommandBuffers();
     createSemaphores();
-
 }
 
 void Program01Renderer::onDrawFrame() {

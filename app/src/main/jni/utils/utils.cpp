@@ -19,8 +19,8 @@ std::vector<const char *> instanceExtension = {VK_KHR_SURFACE_EXTENSION_NAME,
                                                VK_KHR_ANDROID_SURFACE_EXTENSION_NAME};
 const std::vector<const char *> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-uint32_t graphicsFamily = -1;
-uint32_t presentFamily = -1;
+uint32_t graphicsFamily = 0;
+uint32_t presentFamily = 0;
 uint32_t width, height;
 VkDevice device;
 VkQueue graphicsQueue;
@@ -38,7 +38,6 @@ std::vector<VkFramebuffer> swapChainFramebuffers;
 VkCommandPool commandPool;
 std::vector<VkCommandBuffer> commandBuffers;
 VkSemaphore imageAvailableSemaphore;
-VkSemaphore renderFinishedSemaphore;
 
 bool init_global_layer_properties() {
     if (!InitVulkan()) {
@@ -173,17 +172,17 @@ bool isDeviceSuitable(VkPhysicalDevice device) {
     std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
     vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
     uint32_t i = 0;
-    for (const auto &queueFamily : queueFamilies) {
-        if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
-            graphicsFamily = i;
-        }
-        VkBool32 presentSupport = false;
-        vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
-        if (presentSupport) {
-            presentFamily = i;
-        }
-        i++;
-    }
+//    for (const auto &queueFamily : queueFamilies) {
+//        if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+//            graphicsFamily = i;
+//        }
+//        VkBool32 presentSupport = false;
+//        vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
+//        if (presentSupport) {
+//            presentFamily = i;
+//        }
+//        i++;
+//    }
     bool extensionsSupport = checkDeviceExtensionSupport(device);
     bool swapChainAdequate = false;
     if (extensionsSupport) {
@@ -254,6 +253,7 @@ void createSurface(ANativeWindow *pWindow) {
 }
 void initDeviceQueue() {
     vkGetDeviceQueue(device, graphicsFamily, 0, &graphicsQueue);
+    LOGI("graphicsFamily=%d",graphicsFamily);
     if (graphicsFamily == presentFamily) {
         presentQueue = graphicsQueue;
         LOGI("graphicsFamily==presentFamily==%d", graphicsFamily);
@@ -602,8 +602,7 @@ void createCommandBuffers() {
 void createSemaphores() {
     VkSemaphoreCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-    if (vkCreateSemaphore(device, &createInfo, nullptr, &imageAvailableSemaphore) != VK_SUCCESS ||
-        vkCreateSemaphore(device, &createInfo, nullptr, &renderFinishedSemaphore) != VK_SUCCESS) {
+    if (vkCreateSemaphore(device, &createInfo, nullptr, &imageAvailableSemaphore) != VK_SUCCESS ) {
         LOGE("falied to create semaphores!");
     } else {
         LOGI("success to create semaphores!");
@@ -623,9 +622,8 @@ void drawFrame() {
     submintInfo.commandBufferCount = 1;
     submintInfo.pCommandBuffers = &commandBuffers[imageIndex];
 
-    VkSemaphore signalSemaphores[] = {renderFinishedSemaphore};
-    submintInfo.signalSemaphoreCount = 1;
-    submintInfo.pSignalSemaphores = signalSemaphores;
+    submintInfo.signalSemaphoreCount = 0;
+    submintInfo.pSignalSemaphores = nullptr;
     if (vkQueueSubmit(graphicsQueue, 1, &submintInfo, VK_NULL_HANDLE) != VK_SUCCESS) {
         LOGE("failed to submit draw command buffer!");
     } else {
@@ -633,20 +631,22 @@ void drawFrame() {
     }
     VkPresentInfoKHR presentInfo = {};
     presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-    presentInfo.waitSemaphoreCount = 1;
-    presentInfo.pWaitSemaphores = signalSemaphores;
+    presentInfo.waitSemaphoreCount = 0;
+    presentInfo.pWaitSemaphores = nullptr;
 
     VkSwapchainKHR swapChains[] = {swapChain};
     presentInfo.swapchainCount = 1;
     presentInfo.pSwapchains = swapChains;
     presentInfo.pImageIndices = &imageIndex;
     presentInfo.pResults = nullptr;
-    vkQueuePresentKHR(presentQueue,&presentInfo);
-    vkQueueWaitIdle(presentQueue);
+    if (vkQueuePresentKHR(presentQueue,&presentInfo)!=VK_SUCCESS){
+        LOGE("failed to vkQueuePresentKHR!");
+    } else{
+        LOGE("success to vkQueuePresentKHR!");
+    }
 }
 void cleanup() {
     LOGI("cleanup");
-    vkDestroySemaphore(device, renderFinishedSemaphore, nullptr);
     vkDestroySemaphore(device, imageAvailableSemaphore, nullptr);
     vkDestroyCommandPool(device, commandPool, nullptr);
     for (auto framebuffer:swapChainFramebuffers) {
@@ -667,4 +667,4 @@ void cleanup() {
 
 #ifdef __cplusplus
 }
-#endif // __cplusplus
+#endif // __cplusplus     
